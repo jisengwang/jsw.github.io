@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ແອັບຕິດຕາມການຝາກທ້ອງ</title>
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #27ae60;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Phetsarath OT', sans-serif; /* ຟອນລາວ ຖ້າມີ */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 25px;
+            overflow: hidden;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .balance-title {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box; /* ສຳຄັນເພື່ອບໍ່ໃຫ້ input ລົ້ນ */
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        button.add-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button.add-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .history-section h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        ul.transaction-list {
+            list-style-type: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        ul.transaction-list li {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            transition: transform 0.2s;
+        }
+
+        ul.transaction-list li:hover {
+            background-color: #fafafa;
+            transform: translateX(5px);
+        }
+
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: #ccc;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa; 
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>💰 ຕູ້ຝາກທ້ອງອອນລາຍ</h2>
+
+        <!-- ສ່ວນສະແດງຍອດລວມ -->
+        <div class="balance-card">
+            <div class="balance-title">ຍອດເງິນຝາກລວມ</div>
+            <div class="balance-amount">₭ <span id="total-balance">0</span></div>
+        </div>
+
+        <!-- ຟອມບັນທຶກການຝາກ -->
+        <form id="savings-form">
+            <div class="form-group">
+                <label for="amount">ຈຳນວນເງິນ (ກີບ)</label>
+                <input type="number" id="amount" placeholder="ຕົວຢ່າງ: 5000" required min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="note">ໝາຍເຫດ (ຖ້າມີ)</label>
+                <input type="text" id="note" placeholder="ຕົວຢ່າງ: ເງິນແຕກ, ເງິນເຫຼືອຈາກກິນ...">
+            </div>
+
+            <div class="form-group">
+                <label for="date">ວັນທີ</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <button type="submit" class="add-btn">➕ ຝາກເງິນ</button>
+        </form>
+
+        <!-- ປະຫວັດການຝາກ -->
+        <div class="history-section">
+            <h3>📜 ປະຫວັດການຝາກ</h3>
+            <ul id="transaction-list" class="transaction-list">
+                <!-- ຂໍ້ມູນຈະຖືກເພີ່ມເຂົ້າມາທາງ JavaScript -->
+            </ul>
+            <p id="empty-msg" class="empty-message">ຍັງບໍ່ມີປະຫວັດການຝາກ</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="clearAllData()" style="background:none; border:none; color:#999; cursor:pointer; font-size:0.8rem; text-decoration:underline;">ລຶບຂໍ້ມູນທັງໝົດ</button>
+        </div>
+    </div>
+
+    <script>
+        // ຕົວປ່ຽນ global
+        const balanceEl = document.getElementById('total-balance');
+        const listEl = document.getElementById('transaction-list');
+        const form = document.getElementById('savings-form');
+        const amountInput = document.getElementById('amount');
+        const noteInput = document.getElementById('note');
+        const dateInput = document.getElementById('date');
+        const emptyMsg = document.getElementById('empty-msg');
+
+        // ດຶງຂໍ້ມູນຈາກ LocalStorage ຫຼື ສ້າງ array ວ່າງຖ້າຍັງບໍ່ມີ
+        let transactions = localStorage.getItem('savings_transactions') !== null 
+            ? JSON.parse(localStorage.getItem('savings_transactions')) 
+            : [];
+
+        // ຕັ້ງຄ່າວັນທີປັດຈຸບັນເປັນຄ່າເລີ່ມຕົ້ນ
+        dateInput.valueAsDate = new Date();
+
+        // ຟັງຊັນເພີ່ມເງິນ
+        function addTransaction(e) {
+            e.preventDefault();
+
+            if(amountInput.value.trim() === '' || dateInput.value.trim() === '') {
+                alert('ກະລຸນາໃສ່ຈຳນວນເງິນ ແລະ ວັນທີ');
+                return;
+            }
+
+            const transaction = {
+                id: generateID(),
+                amount: +amountInput.value, // ປ່ຽນເປັນຕົວເລກ
+                note: noteInput.value.trim() || 'ບໍ່ມີໝາຍເຫດ',
+                date: dateInput.value
+            };
+
+            transactions.push(transaction);
+            updateLocalStorage();
+            init();
+
+            // ລ້າງຄ່າໃນຟອມ
+            amountInput.value = '';
+            noteInput.value = '';
+            // ຮັກສາວັນທີໄວ້ຄືເກົ່າ ຫຼື ຈະຕັ້ງໃໝ່ກໍໄດ້
+        }
+
+        // ສ້າງ ID ແບບສຸ່ມ
+        function generateID() {
+            return Math.floor(Math.random() * 100000000);
+        }
+
+        // ຟັງຊັນລຶບຂໍ້ມູນ
+        function removeTransaction(id) {
+            if(confirm('ຕ້ອງການລຶບຂໍ້ມູນນີ້ບໍ່?')) {
+                transactions = transactions.filter(transaction => transaction.id !== id);
+                updateLocalStorage();
+                init();
+            }
+        }
+
+        // ຟັງຊັນລຶບຂໍ້ມູນທັງໝົດ
+        function clearAllData() {
+            if(confirm('ຄຳເຕືອນ: ທ່ານກຳລັງຈະລຶບປະຫວັດການຝາກທັງໝົດ! ຕ້ອງການສືບຕໍ່ບໍ່?')) {
+                transactions = [];
+                updateLocalStorage();
+                init();
+            }
+        }
+
+        // ຟັງຊັນສະແດງຜົນບວກເງິນ
+        function updateValues() {
+            const amounts = transactions.map(transaction => transaction.amount);
+            const total = amounts.reduce((acc, item) => (acc += item), 0);
+            
+            // ຈັດຮູບແບບຕົວເລກ (ເຊັ່ນ: 1,000)
+            balanceEl.innerText = total.toLocaleString('lo-LA');
+        }
+
+        // ຟັງຊັນສະແດງລາຍການໃນ List
+        function addTransactionDOM(transaction) {
+            const item = document.createElement('li');
+
+            item.innerHTML = `
+                <div class="transaction-info">
+                    <span>${transaction.note}</span>
+                    <span class="transaction-date">${formatDate(transaction.date)}</span>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <span class="transaction-amount">+₭ ${transaction.amount.toLocaleString('lo-LA')}</span>
+                    <button class="delete-btn" onclick="removeTransaction(${transaction.id})">&times;</button>
+                </div>
+            `;
+
+            listEl.appendChild(item);
+        }
+
+        // ຟັງຊັນຈັດຮູບແບບວັນທີ
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('lo-LA', options);
+        }
+
+        // ຟັງຊັນອັບເດດ LocalStorage
+        function updateLocalStorage() {
+            localStorage.setItem('savings_transactions', JSON.stringify(transactions));
+        }
+
+        // ຟັງຊັນເລີ່ມຕົ້ນ (Init)
+        function init() {
+            listEl.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                emptyMsg.style.display = 'block';
+            } else {
+                emptyMsg.style.display = 'none';
+                // ລຽງລຳດັບຈາກຫຼ້າສຸດໄປຫາເກົ່າ
+                const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+                sortedTransactions.forEach(addTransactionDOM);
+            }
+            
+            updateValues();
+        }
+
+        // ຮັບການ submit ຈາກຟອມ
+        form.addEventListener('submit', addTransaction);
+
+        // ເລີ່ມຕົ້ນແອັບ
+        init();
+
+    </script>
+</body>
+</html>
